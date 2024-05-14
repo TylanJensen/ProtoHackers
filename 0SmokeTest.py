@@ -6,7 +6,6 @@ import socket
 def main():
     HOST = "0.0.0.0"
     PORT = 65432
-
     #creates a socket that supports context manager type. 
     #AF_INET internet adress for IPv4 expects two-tuple (host,port)
     #SOCK_STREAM socket type for TCP
@@ -14,15 +13,17 @@ def main():
         #.bind() method assosciates specific network interface and port number
         s.bind((HOST,PORT))
         s.listen()
-        conn, addr = s.accept()
-        with conn:
-            print(f"Connected by {addr}")
-            while True:
-                data = conn.recv(1024)
-                print(data)
-                if not data:
-                    break
-                conn.sendall(data)
+        while True:
+            conn, addr = s.accept()
+            with conn:
+                print(f"Connected by {addr}")
+                while True:
+                    data = conn.recv(1024)
+                    print(data)
+                    if not data:
+                        break
+
+                    conn.sendall(data)
 
     
 #guard the main function call with an if statement. 
