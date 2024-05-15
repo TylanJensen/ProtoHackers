@@ -12,7 +12,6 @@ def threadedFunction(conn,addr):
                 print(data)
                 dataDic = json.loads(data)
                 if dataDic["method"] == "isPrime" and type(dataDic["number"]) == int :
-                    print("You did it")
                     n = dataDic["number"]
                     primeBool = 1
                     if (n > 1):
@@ -22,19 +21,21 @@ def threadedFunction(conn,addr):
                                 break
                         if(primeBool == 1):
                             print("Prime")
-                            returnData = {"method":"isPrime","prime":bool(primeBool)}
-                            
-                            
+                            returnData = {"method":"isPrime","prime":"true"}
+                            print(bytes(json.dumps(returnData, separators=(',', ':')), 'utf-8'))
                             conn.sendall(bytes(json.dumps(returnData), 'utf-8'))
                         else:
                             print("Not Prime")
-                            returnData = {"method":"isPrime","prime":bool(primeBool)}
-                            conn.sendall(bytes(json.dumps(returnData), 'utf-8'))
+                            returnData = {"method":"isPrime","prime":"false"}
+                            print(bytes(json.dumps(returnData, separators=(',', ':')), 'utf-8'))
+                            conn.sendall(bytes(json.dumps(returnData, separators=(',', ':')), 'utf-8'))
+                            break
                                         
                 else:
                     print("Failure")
                     conn.sendall(data)
                     break
+            return
 
 def main():
     HOST = "0.0.0.0"
@@ -51,8 +52,11 @@ def main():
         while True:
             conn, addr = s.accept()
             thread = Thread(target = threadedFunction, args = (conn,addr))
+
             thread.start()
-            thread.join()                    
+            print("Starting", thread.name)
+            thread.join()
+            print("Joining", thread.name)                    
 
 if __name__ == "__main__":
     main()
