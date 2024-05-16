@@ -42,7 +42,8 @@ def threadedFunction(conn,addr):
                     print("Failure")
                     conn.sendall(data)
                     break
-            return
+                #return                  
+
 
 def main():
     HOST = "0.0.0.0"
