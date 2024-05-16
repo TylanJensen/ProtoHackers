@@ -3,12 +3,15 @@ import json
 from math import sqrt
 from threading import Thread
 
-def threadedFunction(conn,addr):
+def threadedFunction(conn: socket.socket,addr):
     with conn:
+        file = conn.makefile()
         print(f"Connected by {addr}")
         while True:
             while True:
-                data = conn.recv(1024)
+                # 0123                20                                                                                                  1024|
+                # {"method"}\n{asdkf}\n                                                                                              \n{"method":"isPrime", "number":3}
+                data = file.readline()
                 print(data)
                 dataDic = json.loads(data)
                 if dataDic.get('method') is not None and dataDic.get('number')is not None:
@@ -37,6 +40,10 @@ def threadedFunction(conn,addr):
                             print(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'utf-8'))
                             conn.sendall(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'ascii'))
                             break
+                    else:
+                        print("Failure")
+                        conn.sendall(data)
+                        break
                                             
                 else:
                     print("Failure")
@@ -63,8 +70,7 @@ def main():
 
             thread.start()
             print("Starting", thread.name)
-        thread.join
-        print("Joining", thread.name)                    
+                    
 
 if __name__ == "__main__":
     main()
