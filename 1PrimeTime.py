@@ -3,6 +3,10 @@ import json
 from math import sqrt
 from threading import Thread
 
+
+def is_prime(num: int) -> bool:
+    return False
+    
 def threadedFunction(conn: socket.socket,addr):
     with conn:
         file = conn.makefile()
