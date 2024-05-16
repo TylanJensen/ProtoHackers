@@ -6,18 +6,32 @@ from threading import Thread
 
 def is_prime(num: int) -> bool:
     return False
-    
+
 def threadedFunction(conn: socket.socket,addr):
     with conn:
         file = conn.makefile()
         print(f"Connected by {addr}")
         while True:
             while True:
-                # 0123                20                                                                                                  1024|
-                # {"method"}\n{asdkf}\n                                                                                              \n{"method":"isPrime", "number":3}
                 data = file.readline()
                 print(data)
                 dataDic = json.loads(data)
+
+                #guard clause for checking if malformed
+                if dataDic.get('method') is None or dataDic.get('number') is None:
+                    print("Failure")
+                    conn.sendall(data)
+                    break
+                #guard clause to check if submission contains needed fields
+                if dataDic["method"] != "isPrime" or type(dataDic["number"]) != int :
+                    print("Failure")
+                    conn.sendall(data)
+                    break
+                
+                prime = is_prime(dataDic["number"])
+                returnData = {"method":"isPrime","prime":prime}
+                conn.sendall(returnData)
+
                 if dataDic.get('method') is not None and dataDic.get('number')is not None:
                     if dataDic["method"] == "isPrime" and type(dataDic["number"]) == int :
                         n = dataDic["number"]
@@ -48,7 +62,6 @@ def threadedFunction(conn: socket.socket,addr):
                         print("Failure")
                         conn.sendall(data)
                         break
-                                            
                 else:
                     print("Failure")
                     conn.sendall(data)
