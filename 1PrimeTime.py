@@ -11,7 +11,7 @@ def threadedFunction(conn,addr):
                 data = conn.recv(1024)
                 print(data)
                 dataDic = json.loads(data)
-                if dataDic.get('method') and dataDic.get('number'):
+                if dataDic.get('method') is not None and dataDic.get('number')is not None:
                     if dataDic["method"] == "isPrime" and type(dataDic["number"]) == int :
                         n = dataDic["number"]
                         primeBool = 0
