@@ -5,7 +5,11 @@ from threading import Thread
 
 
 def is_prime(num: int) -> bool:
-    return False
+    if (num > 1):
+        for i in range (2, int(sqrt(num)) + 1):
+            if(num % i == 0):
+                return False
+    return True
 
 def threadedFunction(conn: socket.socket,addr):
     with conn:
@@ -16,58 +20,45 @@ def threadedFunction(conn: socket.socket,addr):
                 data = file.readline()
                 print(data)
                 dataDic = json.loads(data)
-
                 #guard clause for checking if malformed
                 if dataDic.get('method') is None or dataDic.get('number') is None:
                     print("Failure")
                     conn.sendall(data)
                     break
-                #guard clause to check if submission contains needed fields
+                #guard clause to check if submission contains needed keys
                 if dataDic["method"] != "isPrime" or type(dataDic["number"]) != int :
                     print("Failure")
                     conn.sendall(data)
                     break
-                
-                prime = is_prime(dataDic["number"])
-                returnData = {"method":"isPrime","prime":prime}
-                conn.sendall(returnData)
-
-                if dataDic.get('method') is not None and dataDic.get('number')is not None:
-                    if dataDic["method"] == "isPrime" and type(dataDic["number"]) == int :
-                        n = dataDic["number"]
-                        primeBool = 0
-                        if (n > 1):
-                            for i in range (2, int(sqrt(n)) + 1):
-                                if(n % i == 0):
-                                    primeBool = 1
-                                    break
-                            if(primeBool == 0):
-                                print("Prime")
-                                returnData = {"method":"isPrime","prime":True}
-                                print(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'utf-8'))
-                                conn.sendall(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'ascii'))
-                            else:
-                                print("Not Prime")
-                                returnData = {"method":"isPrime","prime":False}
-                                print(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'utf-8'))
-                                conn.sendall(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'ascii'))
-                                break
-                        else:
-                            print("Negative or something")
-                            returnData = {"method":"isPrime","prime":False}
-                            print(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'utf-8'))
-                            conn.sendall(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'ascii'))
-                            break
-                    else:
-                        print("Failure")
-                        conn.sendall(data)
-                        break
-                else:
+                #guard clause to check if submission contains valid values
+                if dataDic["method"] != "isPrime" or type(dataDic["number"]) != int :
                     print("Failure")
                     conn.sendall(data)
                     break
-                #return                  
-
+                if dataDic.get('method') is None or dataDic.get('number')is None:
+                    print("Failure")
+                    conn.sendall(data)
+                    break
+                #guard clause to check if number is 1, 0 or negative.
+                if dataDic["number"] <= 1:
+                    print("Number less than 1")
+                    returnData = {"method":"isPrime","prime":False}
+                    print(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'utf-8'))
+                    conn.sendall(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'ascii'))
+                    break
+                #Checks if number is prime is true then sends results to client
+                primeBool = is_prime(dataDic["number"])
+                if(primeBool == True):
+                    print("Prime")
+                    returnData = {"method":"isPrime","prime":primeBool}
+                    print(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'utf-8'))
+                    conn.sendall(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'ascii'))
+                else:
+                    print("Not Prime")
+                    returnData = {"method":"isPrime","prime":primeBool}
+                    print(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'utf-8'))
+                    conn.sendall(bytes(json.dumps(returnData, separators=(',', ':')) + "\n", 'ascii'))
+                    break              
 
 def main():
     HOST = "0.0.0.0"
@@ -88,6 +79,5 @@ def main():
             thread.start()
             print("Starting", thread.name)
                     
-
 if __name__ == "__main__":
     main()
