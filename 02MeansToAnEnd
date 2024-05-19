@@ -7,14 +7,15 @@ def readBytes(conn: socket.socket,addr):
     with conn:
         file = conn.makefile('b') # using .makefile allows to take all the data sent by client.
         print(f"Connected by {addr}")
+        print(file.decode('utf-8'))
         while True:
-            behavior = file.read(1)
-            timestamp = file.read(4)
-            price = file.read(4)
-            print(behavior, end="")
-            print(timestamp, end="")
-            print(price)
-            if behavior is None:
+            #behavior = file.read(9)
+            #timestamp = file.read(4)
+            #price = file.read(4)
+            #print(behavior, end="")
+            #print(timestamp.decode("utf-8"), end="")
+            #print(price.decode("utf-8"))
+            #if behavior is None:
                 return
                 
 
