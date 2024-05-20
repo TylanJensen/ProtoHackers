@@ -1,7 +1,6 @@
 import socket
 from threading import Thread
-import sys
-
+import time
 
 def readBytes(conn: socket.socket,addr):
     with conn:
@@ -15,6 +14,8 @@ def readBytes(conn: socket.socket,addr):
                 return
             if behavior == None:
                 return
+            delta = time.ctime(int.from_bytes(timestamp, "big", signed = True))
+            print("Timestamp: ", delta)
             print(behavior.decode("utf-8"), " ", end="")
             print(int.from_bytes(timestamp, "big", signed = True), " ", end="")
             print(int.from_bytes(price, "big", signed = True))
