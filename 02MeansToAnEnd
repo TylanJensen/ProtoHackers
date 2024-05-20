@@ -5,19 +5,20 @@ import sys
 
 def readBytes(conn: socket.socket,addr):
     with conn:
-        file = conn.makefile() # using .makefile allows to take all the data sent by client.
+        file = conn.makefile('b') # using .makefile allows to take all the data sent by client.
         print(f"Connected by {addr}")
         while True:
             behavior = file.read(1)
             timestamp = file.read(4)
             price = file.read(4)
-            if behavior is not "I" or "Q":
+            if not (behavior == b'I' or behavior == b'Q'):
                 return
-            print(behavior, end="")
-            print(timestamp.decode("utf-8"), end="")
-            print(price.decode("utf-8"))
-            if behavior is None:
+            if behavior == None:
                 return
+            print(behavior.decode("utf-8"), " ", end="")
+            print(int.from_bytes(timestamp, "big", signed = True), " ", end="")
+            print(int.from_bytes(price, "big", signed = True))
+
                 
 
 def main():
