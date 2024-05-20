@@ -1,24 +1,65 @@
 import socket
 from threading import Thread
-import time
+import struct
 
+#finds the time in relation to Epoch time and returns a string
+#I think I many not need this function
+""" def findTime(timestampIn):
+    delta = time.ctime(int.from_bytes(timestampIn, "big", signed = True))
+    print("Timestamp: ", delta)
+    return(delta)  """
+#takes in information from the client and does work
 def readBytes(conn: socket.socket,addr):
     with conn:
         file = conn.makefile('b') # using .makefile allows to take all the data sent by client.
         print(f"Connected by {addr}")
+        historicalPD = {}
+        filteredTup =[]
         while True:
-            behavior = file.read(1)
-            timestamp = file.read(4)
-            price = file.read(4)
-            if not (behavior == b'I' or behavior == b'Q'):
+            behaviorIn = file.read(1)
+            firstIn = file.read(4)
+            secondIn = file.read(4)
+            if behaviorIn == None:
+                break
+            #guard clause in not I or B
+            if not (behaviorIn == b'I' or behaviorIn == b'Q'):
                 return
-            if behavior == None:
+            #guard clause if first or second are empty
+            if firstIn == None or secondIn == None:
                 return
-            delta = time.ctime(int.from_bytes(timestamp, "big", signed = True))
-            print("Timestamp: ", delta)
-            print(behavior.decode("utf-8"), " ", end="")
-            print(int.from_bytes(timestamp, "big", signed = True), " ", end="")
-            print(int.from_bytes(price, "big", signed = True))
+            #inserts into dictionary
+            if behaviorIn == b'I':
+                timestamp = int.from_bytes(firstIn, "big", signed = True)
+                historicalPD[timestamp] = int.from_bytes(secondIn, "big", signed = True)
+                continue
+            #queries the dictionary and finds mean
+            if behaviorIn == b'Q':
+                print(historicalPD)
+                sortedHistoricalPD = sorted(historicalPD.items())       
+                minTime = int.from_bytes(firstIn, "big", signed = True)
+                maxTime = int.from_bytes(secondIn, "big", signed = True)
+                n = 0
+                print(sortedHistoricalPD)
+                #filters the sorted tuple list into only the values that fit between the min and max
+                filteredTup = set([i for i in sortedHistoricalPD if i[0] >= minTime and i[0] <= maxTime])
+                print("Filtered:", filteredTup)
+                
+                if filteredTup:
+                    mean = int(sum(n for _, n in filteredTup) / len(filteredTup))
+                else:
+                    mean = 0
+                    
+                meanHex = hex(mean)
+                
+                hexFour = int.to_bytes(mean, byteorder = "big", signed = True, length = 4)
+                bytes.fromhex
+                print(meanHex)
+                print(hexFour)
+                conn.sendall(hexFour)
+                continue
+
+        return
+
 
                 
 
@@ -34,6 +75,7 @@ def main():
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((HOST,PORT))
         s.listen()
+        historicalPD = {}
         while True:
             conn, addr = s.accept()
             thread = Thread(target = readBytes, args = (conn,addr))
